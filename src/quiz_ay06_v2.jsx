@@ -773,7 +773,7 @@ function PlayerApp() {
       </div>
 
       {!voted?(
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,flex:1}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))",gap:10,paddingBottom:20}}>
           {q.opts.map((opt,i)=>{
             const l=LS[i];
             return (
@@ -971,7 +971,7 @@ function SoloApp() {
         padding:"20px 24px",marginBottom:24,marginTop:20}}>
         <p style={{margin:0,fontSize:22,fontWeight:700,lineHeight:1.45,color:C.white}}>{q.q}</p>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,flex:1}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))",gap:14,width:"100%",paddingBottom:20}}>
         {q.opts.map((opt,i)=>{
           const l=LS[i];
           return (
