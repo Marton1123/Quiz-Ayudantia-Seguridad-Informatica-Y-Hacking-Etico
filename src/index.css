@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
@@ -109,3 +109,20 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+.opts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-bottom: 20px;
+  width: 100%;
+}
+@media (min-width: 900px) {
+  .opts-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+}
+
+
+

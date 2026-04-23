@@ -264,7 +264,7 @@ function HomeScreen({ onHost, onJoin, onSolo }) {
 }
 
 // ─── HOST APP ─────────────────────────────────────────────────────────────────
-function HostApp() {
+function HostApp({ onBack }) {
   const [gs,  setGs ]    = useState({phase:"lobby",qIndex:0,timerEnd:0});
   const [players,setPlayers] = useState([]);
   const [votes, setVotes]    = useState({A:0,B:0,C:0,D:0});
@@ -410,6 +410,7 @@ function HostApp() {
       {/* Top bar */}
       <div style={{background:C.card,borderBottom:`1px solid ${C.border}`,
         padding:"7px 18px",display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+        <button onClick={onBack} title="Volver al menú" style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:4,height:24,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:C.white,fontSize:14,padding:"0 6px",paddingBottom:2}}>←</button>
         <span style={{fontFamily:"Consolas,monospace",color:C.green,fontSize:12,fontWeight:700}}>HOST</span>
         <span style={{color:C.border}}>|</span>
         <span style={{fontFamily:"Consolas,monospace",color:C.muted,fontSize:11}}>
@@ -469,7 +470,7 @@ function HostApp() {
               <p style={{fontSize:22,fontWeight:700,margin:0,lineHeight:1.4,color:C.white}}>{q.q}</p>
             </div>
 
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:18}}>
+            <div className="opts-grid" style={{marginBottom: 10, paddingBottom: 0}}>
               {q.opts.map((opt,i)=>(
                 <div key={i} style={{background:C.card2,border:`1px solid ${LC[LS[i]]}40`,
                   borderRadius:8,padding:"14px 16px",display:"flex",gap:12,alignItems:"center"}}>
@@ -612,7 +613,7 @@ function HostApp() {
 }
 
 // ─── PLAYER APP ───────────────────────────────────────────────────────────────
-function PlayerApp() {
+function PlayerApp({ onBack }) {
   const pidRef = useRef(uid());
   const pid = pidRef.current;
 
@@ -733,8 +734,11 @@ function PlayerApp() {
   // ── WAITING ──
   if(gs.phase==="lobby"||gs.phase==="lobby_q") return (
     <div style={{background:C.bg,minHeight:"100vh",display:"flex",flexDirection:"column",
-      alignItems:"center",justifyContent:"center",padding:24,
-      fontFamily:"Calibri,sans-serif",color:C.white,textAlign:"center"}}>
+      padding:24,fontFamily:"Calibri,sans-serif",color:C.white,maxWidth:1200,width:"100%",margin:"0 auto",boxSizing:"border-box"}}>
+      <div style={{display:"flex",alignItems:"center",marginBottom:20}}>
+        <button onClick={onBack} title="Volver al menú" style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:C.white,fontSize:18,paddingBottom:4}}>←</button>
+      </div>
+      <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center"}}>
       <div style={{fontSize:52,marginBottom:16,animation:"pulse 2s ease infinite"}}>⌛</div>
       <h3 style={{margin:"0 0 8px",fontSize:22}}>Hola, {myData.name}!</h3>
       <p style={{color:C.muted,fontSize:14,maxWidth:280}}>
@@ -746,6 +750,7 @@ function PlayerApp() {
         {myData.score} pts
       </div>
       <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}`}</style>
+      </div>
     </div>
   );
 
@@ -773,7 +778,7 @@ function PlayerApp() {
       </div>
 
       {!voted?(
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))",gap:10,paddingBottom:20}}>
+        <div className="opts-grid">
           {q.opts.map((opt,i)=>{
             const l=LS[i];
             return (
@@ -914,7 +919,7 @@ function PlayerApp() {
 }
 
 // ─── SOLO APP ─────────────────────────────────────────────────────────────────
-function SoloApp() {
+function SoloApp({ onBack }) {
   const [gs, setGs] = useState({ phase: "question", qIndex: 0 });
   const [score, setScore] = useState(0);
   const [myAns, setMyAns] = useState(null);
@@ -957,11 +962,14 @@ function SoloApp() {
   // ── VOTING ──
   if (gs.phase === "question") return (
     <div style={{background:C.bg,minHeight:"100vh",display:"flex",flexDirection:"column",
-      padding:"14px 14px 20px",fontFamily:"Calibri,sans-serif",color:C.white,maxWidth:800,margin:"0 auto"}}>
+      padding:"14px 14px 20px",fontFamily:"Calibri,sans-serif",color:C.white,maxWidth:1200,width:"100%",boxSizing:"border-box",margin:"0 auto"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-        <div>
-          <span style={{fontFamily:"Consolas,monospace",color:C.muted,fontSize:11,display:"block"}}>Q{gs.qIndex+1}/{QS.length}</span>
-          <span style={{fontSize:12,color:C.muted}}>{q.topic}</span>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <button onClick={onBack} title="Volver al menú" style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:C.white,fontSize:18,paddingBottom:4}}>←</button>
+          <div>
+            <span style={{fontFamily:"Consolas,monospace",color:C.muted,fontSize:11,display:"block"}}>Q{gs.qIndex+1}/{QS.length}</span>
+            <span style={{fontSize:12,color:C.muted}}>{q.topic}</span>
+          </div>
         </div>
         <div style={{color:C.orange,fontFamily:"Consolas,monospace",fontWeight:700,fontSize:18}}>
           {score}pts
@@ -971,7 +979,7 @@ function SoloApp() {
         padding:"20px 24px",marginBottom:24,marginTop:20}}>
         <p style={{margin:0,fontSize:22,fontWeight:700,lineHeight:1.45,color:C.white}}>{q.q}</p>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))",gap:14,width:"100%",paddingBottom:20}}>
+      <div className="opts-grid">
         {q.opts.map((opt,i)=>{
           const l=LS[i];
           return (
@@ -1002,9 +1010,14 @@ function SoloApp() {
     const isOk = myAns === cLetter;
     return (
       <div style={{background:C.bg,minHeight:"100vh",display:"flex",flexDirection:"column",
-        alignItems:"center",justifyContent:"center",padding:20,
-        fontFamily:"Calibri,sans-serif",color:C.white,textAlign:"center"}}>
-        <div style={{fontSize:60,marginBottom:14}}>{isOk?"🎉":"😅"}</div>
+        padding:20,fontFamily:"Calibri,sans-serif",color:C.white,maxWidth:1200,width:"100%",boxSizing:"border-box",margin:"0 auto"}}>
+        
+        <div style={{display:"flex",alignItems:"center",marginBottom:20}}>
+          <button onClick={onBack} title="Volver al menú" style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:C.white,fontSize:18,paddingBottom:4}}>←</button>
+        </div>
+
+        <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+          <div style={{fontSize:60,marginBottom:14}}>{isOk?"🎉":"😅"}</div>
         <div style={{background:isOk?"#0d2010":"#2a0a0a",
           border:`2px solid ${isOk?C.green:C.red}`,
           borderRadius:12,padding:"20px 24px",marginBottom:20,maxWidth:500,width:"100%"}}>
@@ -1020,12 +1033,15 @@ function SoloApp() {
           <span style={{color:C.green,fontFamily:"Consolas,monospace",fontSize:11,marginBottom:8,display:"block"}}>// explicación</span>
           <p style={{margin:0,fontSize:15,color:C.white,lineHeight:1.6,textAlign:"left"}}>{q.exp}</p>
         </div>
-        <div style={{fontFamily:"Consolas,monospace",fontSize:24,color:C.orange,fontWeight:900,marginBottom:24}}>
+        <div style={{fontFamily:"Consolas,monospace",fontSize:24,color:C.orange,fontWeight:900,marginBottom:24,textAlign:"center"}}>
           {score} pts
         </div>
-        <Btn onClick={nextQuestion} color={C.cyan} style={{fontSize:18,padding:"12px 32px"}}>
-          {gs.qIndex >= QS.length - 1 ? "Ir al Caso →" : "Siguiente Pregunta →"}
-        </Btn>
+        <div style={{textAlign:"center"}}>
+          <Btn onClick={nextQuestion} color={C.cyan} style={{fontSize:18,padding:"12px 32px"}}>
+            {gs.qIndex >= QS.length - 1 ? "Ir al Caso →" : "Siguiente Pregunta →"}
+          </Btn>
+        </div>
+        </div>
       </div>
     );
   }
@@ -1036,6 +1052,9 @@ function SoloApp() {
     return (
       <div style={{background:C.bg,minHeight:"100vh",padding:"20px 20px",
         fontFamily:"Calibri,sans-serif",color:C.white,maxWidth:800,margin:"0 auto"}}>
+        <div style={{display:"flex",alignItems:"center",marginBottom:20}}>
+          <button onClick={onBack} title="Volver al menú" style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:C.white,fontSize:18,paddingBottom:4}}>←</button>
+        </div>
         <div style={{background:`${C.orange}20`,border:`1px solid ${C.orange}`,borderRadius:4,
           padding:"3px 12px",display:"inline-block",fontFamily:"Consolas,monospace",
           fontSize:11,color:C.orange,marginBottom:12}}>CASO PRÁCTICO</div>
@@ -1102,9 +1121,11 @@ function SoloApp() {
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const [mode, setMode] = useState(null);
-  const [pid]  = useState(() => uid());
+  
+  const handleBack = () => setMode(null);
+
   if (!mode) return <HomeScreen onHost={()=>setMode("host")} onJoin={()=>setMode("player")} onSolo={()=>setMode("solo")}/>;
-  if (mode==="host") return <HostApp/>;
-  if (mode==="solo") return <SoloApp/>;
-  return <PlayerApp pid={pid}/>;
+  if (mode==="host") return <HostApp onBack={handleBack}/>;
+  if (mode==="solo") return <SoloApp onBack={handleBack}/>;
+  return <PlayerApp onBack={handleBack}/>;
 }
