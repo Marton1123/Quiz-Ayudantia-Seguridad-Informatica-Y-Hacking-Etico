@@ -780,7 +780,7 @@ function PlayerApp() {
               <button key={l} onClick={()=>handleVote(l)} style={{
                 background:C.card,border:`2px solid ${LC[l]}`,borderRadius:12,
                 padding:"14px 10px",display:"flex",flexDirection:"column",
-                alignItems:"center",gap:8,cursor:"pointer",color:C.white,
+                alignItems:"center",justifyContent:"center",gap:8,cursor:"pointer",color:C.white,
                 fontFamily:"Calibri,sans-serif",textAlign:"center",minHeight:90,
                 transition:"background 0.15s, transform 0.1s",
               }}
@@ -978,7 +978,7 @@ function SoloApp() {
             <button key={l} onClick={()=>handleVote(l)} style={{
               background:C.card,border:`2px solid ${LC[l]}`,borderRadius:12,
               padding:"20px 16px",display:"flex",flexDirection:"column",
-              alignItems:"center",gap:12,cursor:"pointer",color:C.white,
+              alignItems:"center",justifyContent:"center",gap:12,cursor:"pointer",color:C.white,
               fontFamily:"Calibri,sans-serif",textAlign:"center",minHeight:120,
               transition:"background 0.15s, transform 0.1s",
             }}
