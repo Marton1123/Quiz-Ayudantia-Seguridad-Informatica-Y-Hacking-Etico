@@ -210,7 +210,7 @@ const Btn=(({children,onClick,color=C.green,disabled=false,style={}})=>(
 ));
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
-function HomeScreen({ onHost, onJoin }) {
+function HomeScreen({ onHost, onJoin, onSolo }) {
   return (
     <div style={{background:C.bg,minHeight:"100vh",display:"flex",flexDirection:"column",
       alignItems:"center",justifyContent:"center",fontFamily:"Calibri,sans-serif",
@@ -232,6 +232,7 @@ function HomeScreen({ onHost, onJoin }) {
         {[
           {label:"Host / Proyector",icon:"🖥️",sub:"Controla el quiz",color:C.green,fn:onHost},
           {label:"Unirse al Quiz",  icon:"📱",sub:"Vota desde el celular",color:C.cyan,fn:onJoin},
+          {label:"Modo Alumno",     icon:"👤",sub:"Responde a tu ritmo",color:C.purple,fn:onSolo},
         ].map(b=>(
           <button key={b.label} onClick={b.fn} style={{
             background:b.color,color:C.bg,border:"none",borderRadius:12,
@@ -371,7 +372,7 @@ function HostApp() {
   };
 
   const advanceCase=async()=>{
-    const steps=["case_story","case_q1","case_q2","case_q3","finished"];
+    const steps=["case_story","case_q1","case_q2","case_q3","case_q4","finished"];
     const i=steps.indexOf(gs.phase);
     await updateState({...gs,phase:steps[Math.min(i+1,steps.length-1)]});
   };
@@ -547,8 +548,8 @@ function HostApp() {
         )}
 
         {/* CASE */}
-        {["case_story","case_q1","case_q2","case_q3"].includes(gs.phase)&&(()=>{
-          const vis={case_story:0,case_q1:1,case_q2:2,case_q3:3}[gs.phase];
+        {["case_story","case_q1","case_q2","case_q3","case_q4"].includes(gs.phase)&&(()=>{
+          const vis={case_story:0,case_q1:1,case_q2:2,case_q3:3,case_q4:4}[gs.phase];
           return (
             <div>
               <div style={{background:`${C.orange}20`,border:`1px solid ${C.orange}`,borderRadius:4,
@@ -576,11 +577,12 @@ function HostApp() {
                   )}
                 </div>
               ))}
-              <Btn onClick={advanceCase} color={gs.phase==="case_q3"?C.purple:C.orange}
+              <Btn onClick={advanceCase} color={gs.phase==="case_q4"?C.purple:C.orange}
                 style={{marginTop:8}}>
                 {gs.phase==="case_story"?"Mostrar Pregunta 1":
                  gs.phase==="case_q1"?"Revelar P1 + Mostrar P2":
                  gs.phase==="case_q2"?"Revelar P2 + Mostrar P3":
+                 gs.phase==="case_q3"?"Revelar P3":
                  "Revelar Todo → Fin"}
               </Btn>
             </div>
@@ -859,8 +861,8 @@ function PlayerApp() {
   );
 
   // ── CASE ──
-  if(["case_story","case_q1","case_q2","case_q3"].includes(gs.phase)){
-    const vis={case_story:0,case_q1:1,case_q2:2,case_q3:3}[gs.phase];
+  if(["case_story","case_q1","case_q2","case_q3","case_q4"].includes(gs.phase)){
+    const vis={case_story:0,case_q1:1,case_q2:2,case_q3:3,case_q4:4}[gs.phase];
     return (
       <div style={{background:C.bg,minHeight:"100vh",padding:"14px 16px",
         fontFamily:"Calibri,sans-serif",color:C.white}}>
@@ -911,11 +913,198 @@ function PlayerApp() {
   );
 }
 
+// ─── SOLO APP ─────────────────────────────────────────────────────────────────
+function SoloApp() {
+  const [gs, setGs] = useState({ phase: "question", qIndex: 0 });
+  const [score, setScore] = useState(0);
+  const [myAns, setMyAns] = useState(null);
+
+  const q = QS[gs.qIndex] || null;
+
+  const handleVote = (letter) => {
+    if (gs.phase !== "question") return;
+    setMyAns(letter);
+    if (letter === LS[q.ans]) {
+      setScore(s => s + POINTS);
+    }
+    setGs({ ...gs, phase: "revealed" });
+  };
+
+  const nextQuestion = () => {
+    const next = gs.qIndex + 1;
+    setMyAns(null);
+    if (next >= QS.length) {
+      setGs({ phase: "case_story", qIndex: next });
+    } else {
+      setGs({ phase: "question", qIndex: next });
+    }
+  };
+
+  const advanceCase = () => {
+    const steps = ["case_story", "case_q1", "case_q2", "case_q3", "case_q4", "finished"];
+    const i = steps.indexOf(gs.phase);
+    setGs({ ...gs, phase: steps[Math.min(i + 1, steps.length - 1)] });
+  };
+
+  const resetGame = () => {
+    setGs({ phase: "question", qIndex: 0 });
+    setScore(0);
+    setMyAns(null);
+  };
+
+  if(!q && ["question", "revealed"].includes(gs.phase)) return null;
+
+  // ── VOTING ──
+  if (gs.phase === "question") return (
+    <div style={{background:C.bg,minHeight:"100vh",display:"flex",flexDirection:"column",
+      padding:"14px 14px 20px",fontFamily:"Calibri,sans-serif",color:C.white,maxWidth:800,margin:"0 auto"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div>
+          <span style={{fontFamily:"Consolas,monospace",color:C.muted,fontSize:11,display:"block"}}>Q{gs.qIndex+1}/{QS.length}</span>
+          <span style={{fontSize:12,color:C.muted}}>{q.topic}</span>
+        </div>
+        <div style={{color:C.orange,fontFamily:"Consolas,monospace",fontWeight:700,fontSize:18}}>
+          {score}pts
+        </div>
+      </div>
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,
+        padding:"20px 24px",marginBottom:24,marginTop:20}}>
+        <p style={{margin:0,fontSize:22,fontWeight:700,lineHeight:1.45,color:C.white}}>{q.q}</p>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,flex:1}}>
+        {q.opts.map((opt,i)=>{
+          const l=LS[i];
+          return (
+            <button key={l} onClick={()=>handleVote(l)} style={{
+              background:C.card,border:`2px solid ${LC[l]}`,borderRadius:12,
+              padding:"20px 16px",display:"flex",flexDirection:"column",
+              alignItems:"center",gap:12,cursor:"pointer",color:C.white,
+              fontFamily:"Calibri,sans-serif",textAlign:"center",minHeight:120,
+              transition:"background 0.15s, transform 0.1s",
+            }}
+            onMouseOver={e=>e.currentTarget.style.background=`${LC[l]}18`}
+            onMouseOut={e=>e.currentTarget.style.background=C.card}
+            onMouseDown={e=>e.currentTarget.style.transform="scale(0.96)"}
+            onMouseUp={e=>e.currentTarget.style.transform="scale(1)"}
+            >
+              <span style={{fontFamily:"Consolas,monospace",fontSize:36,fontWeight:900,color:LC[l]}}>{l}</span>
+              <span style={{fontSize:16,lineHeight:1.35,color:C.white}}>{opt}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // ── REVEALED ──
+  if (gs.phase === "revealed") {
+    const cLetter = LS[q.ans];
+    const isOk = myAns === cLetter;
+    return (
+      <div style={{background:C.bg,minHeight:"100vh",display:"flex",flexDirection:"column",
+        alignItems:"center",justifyContent:"center",padding:20,
+        fontFamily:"Calibri,sans-serif",color:C.white,textAlign:"center"}}>
+        <div style={{fontSize:60,marginBottom:14}}>{isOk?"🎉":"😅"}</div>
+        <div style={{background:isOk?"#0d2010":"#2a0a0a",
+          border:`2px solid ${isOk?C.green:C.red}`,
+          borderRadius:12,padding:"20px 24px",marginBottom:20,maxWidth:500,width:"100%"}}>
+          <p style={{margin:"0 0 10px",fontSize:24,fontWeight:900,color:isOk?C.green:C.red}}>
+            {isOk ? `¡Correcto! +${POINTS} pts` : `Incorrecto — era ${cLetter}`}
+          </p>
+          <p style={{margin:0,fontSize:18,color:C.white}}>
+            <strong>{q.opts[q.ans]}</strong>
+          </p>
+        </div>
+        <div style={{background:C.card,borderLeft:`3px solid ${C.green}`,borderRadius:8,padding:"16px 20px",
+          marginBottom:24,maxWidth:500,width:"100%"}}>
+          <span style={{color:C.green,fontFamily:"Consolas,monospace",fontSize:11,marginBottom:8,display:"block"}}>// explicación</span>
+          <p style={{margin:0,fontSize:15,color:C.white,lineHeight:1.6,textAlign:"left"}}>{q.exp}</p>
+        </div>
+        <div style={{fontFamily:"Consolas,monospace",fontSize:24,color:C.orange,fontWeight:900,marginBottom:24}}>
+          {score} pts
+        </div>
+        <Btn onClick={nextQuestion} color={C.cyan} style={{fontSize:18,padding:"12px 32px"}}>
+          {gs.qIndex >= QS.length - 1 ? "Ir al Caso →" : "Siguiente Pregunta →"}
+        </Btn>
+      </div>
+    );
+  }
+
+  // ── CASE ──
+  if(["case_story","case_q1","case_q2","case_q3","case_q4"].includes(gs.phase)){
+    const vis={case_story:0,case_q1:1,case_q2:2,case_q3:3,case_q4:4}[gs.phase];
+    return (
+      <div style={{background:C.bg,minHeight:"100vh",padding:"20px 20px",
+        fontFamily:"Calibri,sans-serif",color:C.white,maxWidth:800,margin:"0 auto"}}>
+        <div style={{background:`${C.orange}20`,border:`1px solid ${C.orange}`,borderRadius:4,
+          padding:"3px 12px",display:"inline-block",fontFamily:"Consolas,monospace",
+          fontSize:11,color:C.orange,marginBottom:12}}>CASO PRÁCTICO</div>
+        <h2 style={{fontSize:24,fontWeight:900,margin:"0 0 14px"}}>{CASE.title}</h2>
+        <div style={{background:C.card,borderLeft:`4px solid ${C.orange}`,borderRadius:10,
+          padding:"16px 20px",marginBottom:14}}>
+          {CASE.story.split("\n").map((ln,i)=>(
+            <p key={i} style={{margin:"0 0 5px",fontSize:14,lineHeight:1.65,
+              color:ln.match(/^\d\./)? C.cyan:C.white,
+              fontWeight:ln.match(/^\d\./)?600:400}}>{ln}</p>
+          ))}
+        </div>
+        {CASE.qs.map((cq,i)=>(
+          <div key={i} style={{background:C.card,
+            border:`1px solid ${i<vis?C.orange+"60":C.border}`,
+            borderRadius:8,padding:"13px 16px",marginBottom:10,
+            opacity:i>=vis&&i>0?0.3:1,transition:"all 0.4s"}}>
+            <p style={{margin:"0 0 8px",fontWeight:700,color:C.orange,fontSize:14}}>{cq.q}</p>
+            {i<vis-1&&(
+              <div style={{background:"#0d2010",borderRadius:6,padding:"8px 12px"}}>
+                <p style={{margin:0,color:C.white,fontSize:13,lineHeight:1.6}}>{cq.a}</p>
+              </div>
+            )}
+          </div>
+        ))}
+        <Btn onClick={advanceCase} color={gs.phase==="case_q4"?C.purple:C.orange}
+          style={{marginTop:16}}>
+          {gs.phase==="case_story"?"Mostrar Pregunta 1":
+           gs.phase==="case_q1"?"Revelar P1 + Mostrar P2":
+           gs.phase==="case_q2"?"Revelar P2 + Mostrar P3":
+           gs.phase==="case_q3"?"Revelar P3":
+           "Fin del Simulacro →"}
+        </Btn>
+      </div>
+    );
+  }
+
+  // ── FINISHED ──
+  return (
+    <div style={{background:C.bg,minHeight:"100vh",display:"flex",flexDirection:"column",
+      alignItems:"center",justifyContent:"center",padding:24,
+      fontFamily:"Calibri,sans-serif",color:C.white,textAlign:"center"}}>
+      <div style={{fontSize:60,marginBottom:14}}>🎓</div>
+      <h2 style={{fontSize:32,fontWeight:900,margin:"0 0 8px"}}>¡Simulacro completado!</h2>
+      <p style={{color:C.muted,marginBottom:24,fontSize:16}}>Tu resultado final (Modo Alumno)</p>
+      <div style={{background:C.card,border:`2px solid ${C.orange}`,borderRadius:12,
+        padding:"24px 44px",marginBottom:24}}>
+        <p style={{margin:0,fontSize:48,fontWeight:900,color:C.orange,
+          fontFamily:"Consolas,monospace"}}>{score} pts</p>
+        <p style={{margin:"6px 0 0",color:C.muted,fontSize:14}}>de {QS.length*POINTS} posibles</p>
+      </div>
+      <div style={{background:"#1a0a0a",border:`1px solid ${C.orange}50`,
+        borderRadius:8,padding:"10px 24px",marginBottom:24}}>
+        <span style={{color:C.orange,fontWeight:"bold",fontSize:16}}>⚠ Prueba: Lunes 28 de Abril</span>
+      </div>
+      <Btn onClick={resetGame} color={C.muted} style={{background:"transparent",
+        border:`1px solid ${C.muted}`,color:C.muted}}>
+        $ volver_a_intentar
+      </Btn>
+    </div>
+  );
+}
+
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const [mode, setMode] = useState(null);
   const [pid]  = useState(() => uid());
-  if (!mode) return <HomeScreen onHost={()=>setMode("host")} onJoin={()=>setMode("player")}/>;
+  if (!mode) return <HomeScreen onHost={()=>setMode("host")} onJoin={()=>setMode("player")} onSolo={()=>setMode("solo")}/>;
   if (mode==="host") return <HostApp/>;
+  if (mode==="solo") return <SoloApp/>;
   return <PlayerApp pid={pid}/>;
 }
