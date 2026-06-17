@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
@@ -55,11 +55,7 @@ body {
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
+  width: 100%;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -112,14 +108,19 @@ code {
 
 .opts-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
   padding-bottom: 20px;
   width: 100%;
 }
-@media (min-width: 900px) {
+.opts-grid span {
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+@media (min-width: 768px) {
   .opts-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 14px;
   }
 }

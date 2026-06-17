@@ -1,4 +1,4 @@
-import QuizApp from './quiz_ay06_v2';
+import QuizApp from './quiz_ay09';
 
 function App() {
   return <QuizApp />
